@@ -11,32 +11,25 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan'
+                withCredentials([usernamePassword(
+                    credentialsId: 'aws-credentials-1',
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                )]) {
+                    sh 'terraform plan'
+                }
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve'
-            }
-        }
-
-        stage('Get EC2 IP') {
-            steps {
-                script {
-                    EC2_IP = sh(script: "terraform output -raw ec2_ip", returnStdout: true).trim()
-                    echo "EC2 Public IP: ${EC2_IP}"
+                withCredentials([usernamePassword(
+                    credentialsId: 'aws-credentials-1',
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                )]) {
+                    sh 'terraform apply -auto-approve'
                 }
-            }
-        }
-
-        stage('Run Ansible') {
-            steps {
-                sh """
-                ansible-playbook -i ${EC2_IP}, nginx.yml \
-                --private-key my-tf-key.pem \
-                -u ubuntu
-                """
             }
         }
 
