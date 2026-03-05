@@ -2,7 +2,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# VPC
+# Create VPC
 resource "aws_vpc" "demo_vpc" {
   cidr_block = "10.0.0.0/16"
 
@@ -11,7 +11,7 @@ resource "aws_vpc" "demo_vpc" {
   }
 }
 
-# Subnet
+# Create Subnet
 resource "aws_subnet" "demo_subnet" {
   vpc_id                  = aws_vpc.demo_vpc.id
   cidr_block              = "10.0.1.0/24"
@@ -23,7 +23,7 @@ resource "aws_subnet" "demo_subnet" {
   }
 }
 
-# Internet Gateway
+# Create Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.demo_vpc.id
 
@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-# Route Table
+# Create Route Table
 resource "aws_route_table" "rt" {
   vpc_id = aws_vpc.demo_vpc.id
 
@@ -46,7 +46,7 @@ resource "aws_route_table" "rt" {
   }
 }
 
-# Route Table Association
+# Associate Route Table with Subnet
 resource "aws_route_table_association" "rta" {
   subnet_id      = aws_subnet.demo_subnet.id
   route_table_id = aws_route_table.rt.id
@@ -54,11 +54,11 @@ resource "aws_route_table_association" "rta" {
 
 # Security Group
 resource "aws_security_group" "web_sg" {
-  name   = "web-sg"
+  name   = "web-security-group"
   vpc_id = aws_vpc.demo_vpc.id
 
   ingress {
-    description = "SSH"
+    description = "Allow SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -66,7 +66,7 @@ resource "aws_security_group" "web_sg" {
   }
 
   ingress {
-    description = "HTTP"
+    description = "Allow HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -79,17 +79,14 @@ resource "aws_security_group" "web_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Name = "web-security-group"
-  }
 }
 
-# EC2 Instance
+# Create EC2 Instance
 resource "aws_instance" "web" {
   ami           = "ami-0f3caa1cf4417e51b"
   instance_type = "t3.micro"
-  key_name      = "devops-small-repo"
+
+  key_name = "devops-small-repo"
 
   subnet_id              = aws_subnet.demo_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
@@ -99,7 +96,7 @@ resource "aws_instance" "web" {
   }
 }
 
-# Output EC2 Public IP
+# Output Public IP
 output "ec2_ip" {
   value = aws_instance.web.public_ip
 }
