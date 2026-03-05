@@ -86,13 +86,13 @@ resource "aws_instance" "web" {
   ami           = "ami-0f3caa1cf4417e51b"
   instance_type = "t3.micro"
 
-  key_name = "devops-small-repo"
+  key_name = "small-task"
 
   subnet_id              = aws_subnet.demo_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
   tags = {
-    Name = "small-task"
+    Name = "devops-demo-instance"
   }
 }
 
