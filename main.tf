@@ -13,10 +13,9 @@ resource "aws_vpc" "demo_vpc" {
 
 # Subnet
 resource "aws_subnet" "demo_subnet" {
-  vpc_id            = aws_vpc.demo_vpc.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
-
+  vpc_id                  = aws_vpc.demo_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
 
   tags = {
@@ -41,6 +40,10 @@ resource "aws_route_table" "rt" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.gw.id
   }
+
+  tags = {
+    Name = "devops-route-table"
+  }
 }
 
 # Route Table Association
@@ -55,6 +58,7 @@ resource "aws_security_group" "web_sg" {
   vpc_id = aws_vpc.demo_vpc.id
 
   ingress {
+    description = "SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -62,6 +66,7 @@ resource "aws_security_group" "web_sg" {
   }
 
   ingress {
+    description = "HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -74,22 +79,27 @@ resource "aws_security_group" "web_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "web-security-group"
+  }
 }
 
 # EC2 Instance
 resource "aws_instance" "web" {
   ami           = "ami-0f3caa1cf4417e51b"
   instance_type = "t3.micro"
-  key_name      = "my-tf-key"
+  key_name      = "devops-small-repo"
 
   subnet_id              = aws_subnet.demo_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
 
   tags = {
-    Name = "devops-demo"
+    Name = "devops-demo-instance"
   }
 }
 
+# Output EC2 Public IP
 output "ec2_ip" {
   value = aws_instance.web.public_ip
 }
