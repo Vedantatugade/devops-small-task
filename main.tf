@@ -23,7 +23,7 @@ resource "aws_subnet" "demo_subnet" {
   }
 }
 
-# Create Internet Gateway
+# Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.demo_vpc.id
 
@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-# Create Route Table
+# Route Table
 resource "aws_route_table" "rt" {
   vpc_id = aws_vpc.demo_vpc.id
 
@@ -46,7 +46,7 @@ resource "aws_route_table" "rt" {
   }
 }
 
-# Associate Route Table with Subnet
+# Route Table Association
 resource "aws_route_table_association" "rta" {
   subnet_id      = aws_subnet.demo_subnet.id
   route_table_id = aws_route_table.rt.id
@@ -79,24 +79,29 @@ resource "aws_security_group" "web_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "web-security-group"
+  }
 }
 
-# Create EC2 Instance
+# EC2 Instance
 resource "aws_instance" "web" {
   ami           = "ami-0f3caa1cf4417e51b"
   instance_type = "t3.micro"
-
-  key_name = "small-task"
+  key_name      = "small-task"
 
   subnet_id              = aws_subnet.demo_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  associate_public_ip_address = true
 
   tags = {
     Name = "devops-demo-instance"
   }
 }
 
-# Output Public IP
+# Output EC2 Public IP
 output "ec2_ip" {
   value = aws_instance.web.public_ip
 }
