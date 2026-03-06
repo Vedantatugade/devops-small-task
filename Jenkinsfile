@@ -33,29 +33,11 @@ pipeline {
             }
         }
 
-        stage('Wait 10 Seconds') {
+        stage('Run Ansible Playbook') {
             steps {
-                bat 'timeout /t 10'
+                bat 'ansible-playbook -i inventory.ini nginx.yaml'
             }
         }
 
-        stage('Terraform Destroy') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'aws-credentials-1',
-                    usernameVariable: 'AWS_ACCESS_KEY_ID',
-                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-                )]) {
-                    bat 'terraform destroy -auto-approve'
-                }
-            }
-        }
-
-    }
-
-    post {
-        success {
-            echo 'Resources created and destroyed successfully'
-        }
     }
 }
