@@ -1,15 +1,16 @@
 ---
-- hosts: all
+- name: Install Nginx
+  hosts: web
   become: yes
-  tasks:
 
-    - name: Install Nginx
-      apt:
+  tasks:
+    - name: Install nginx
+      dnf:
         name: nginx
         state: present
-        update_cache: yes
 
-    - name: Start Nginx
+    - name: Start nginx
       service:
         name: nginx
         state: started
+        enabled: yes
