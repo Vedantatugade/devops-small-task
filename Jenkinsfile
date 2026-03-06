@@ -9,18 +9,6 @@ pipeline {
             }
         }
 
-        stage('Terraform Plan') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'aws-credentials-1',
-                    usernameVariable: 'AWS_ACCESS_KEY_ID',
-                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-                )]) {
-                    bat 'terraform plan'
-                }
-            }
-        }
-
         stage('Terraform Apply') {
             steps {
                 withCredentials([usernamePassword(
@@ -33,9 +21,15 @@ pipeline {
             }
         }
 
+        stage('Get EC2 IP') {
+            steps {
+                bat 'terraform output -raw public_ip > ip.txt'
+            }
+        }
+
         stage('Run Ansible Playbook') {
             steps {
-                bat 'ansible-playbook -i inventory.ini nginx.yaml'
+                bat 'wsl ansible-playbook -i inventory.ini nginx.yaml'
             }
         }
 
