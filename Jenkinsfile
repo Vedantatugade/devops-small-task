@@ -33,6 +33,12 @@ pipeline {
             }
         }
 
+        stage('Wait 10 Seconds') {
+            steps {
+                bat 'timeout /t 10'
+            }
+        }
+
         stage('Terraform Destroy') {
             steps {
                 withCredentials([usernamePassword(
@@ -45,5 +51,11 @@ pipeline {
             }
         }
 
+    }
+
+    post {
+        success {
+            echo 'Resources created and destroyed successfully'
+        }
     }
 }
