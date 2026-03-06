@@ -23,7 +23,7 @@ pipeline {
 
         stage('Get EC2 IP') {
             steps {
-                bat 'terraform output -raw public_ip > ip.txt'
+                bat 'terraform output -raw ec2_ip > ip.txt'
             }
         }
 
