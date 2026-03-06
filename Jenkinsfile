@@ -27,6 +27,13 @@ pipeline {
             }
         }
 
+        stage('Create Inventory File') {
+            steps {
+                bat 'echo [web] > inventory.ini'
+                bat 'for /f %%i in (ip.txt) do echo %%i ansible_user=ec2-user ansible_ssh_private_key_file=small-task.pem >> inventory.ini'
+            }
+        }
+
         stage('Run Ansible Playbook') {
             steps {
                 bat 'wsl ansible-playbook -i inventory.ini nginx.yaml'
